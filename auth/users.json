@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "username": "user1",
+      "token": "token1"
+    },
+    {
+      "username": "user1",
+      "token": "token2"
+    }
+  ]
+}
