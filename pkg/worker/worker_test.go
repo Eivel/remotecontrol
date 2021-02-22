@@ -84,8 +84,6 @@ func TestWorker_Stop(t *testing.T) {
 	err = worker.Stop(uuid)
 	require.NoError(t, err)
 
-	require.NoError(t, err)
-
 	for {
 		job, err = dataStorage.Retrieve(uuid)
 		require.True(t, err == nil || err == ErrJobNotFound)
@@ -118,8 +116,6 @@ func TestWorker_Stop_twice(t *testing.T) {
 	}
 
 	err = worker.Stop(uuid)
-	require.NoError(t, err)
-
 	require.NoError(t, err)
 
 	for {

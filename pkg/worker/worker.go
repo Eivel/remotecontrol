@@ -173,9 +173,6 @@ func (worker *Worker) Query(jobUUID uuid.UUID) (*Job, error) {
 	if job.UUID == uuid.Nil {
 		return nil, ErrJobNotFound
 	}
-	if job.UUID == uuid.Nil {
-		return nil, ErrJobNotFound
-	}
 
 	return job, nil
 }
@@ -240,7 +237,9 @@ func (b *Buffer) Len() int {
 func (b *Buffer) Bytes() []byte {
 	b.rw.RLock()
 	defer b.rw.RUnlock()
-	return b.b.Bytes()
+	newSlice := make([]byte, len(b.b.Bytes()))
+	copy(newSlice, b.b.Bytes())
+	return newSlice
 }
 
 // Copy creates a copy of the buffer and underlying slice.
@@ -273,6 +272,7 @@ func NewJob(dataStorage DataStorage, command []string, user string) Job {
 // TODO: Add stopping subprocesses of the started processes.
 // TODO: Add separation of the StdIn and StdErr.
 func (job *Job) start(updateLogsChan chan Job, cmd *exec.Cmd, combinedOutput io.ReadCloser) {
+	defer close(updateLogsChan)
 	job.Status = StatusRunning
 	job.PID = cmd.Process.Pid
 	job.StartedAt = time.Now()
@@ -308,7 +308,6 @@ func (job *Job) start(updateLogsChan chan Job, cmd *exec.Cmd, combinedOutput io.
 	job.FinishedAt = time.Now()
 	job.Status = StatusFinished
 	updateLogsChan <- *job
-	close(updateLogsChan)
 }
 
 // storeOnLogsUpdate waits for the logs buffer to grow in length and sends the logs
