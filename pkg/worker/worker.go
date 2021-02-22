@@ -173,8 +173,8 @@ func (worker *Worker) Query(jobUUID uuid.UUID) (*Job, error) {
 	if job.UUID == uuid.Nil {
 		return nil, ErrJobNotFound
 	}
-	if job.UUID == googleUUID.Nil {
-		return Job{}, ErrJobNotFound
+	if job.UUID == uuid.Nil {
+		return nil, ErrJobNotFound
 	}
 
 	return job, nil
@@ -313,25 +313,6 @@ func (job *Job) start(updateLogsChan chan Job, cmd *exec.Cmd, combinedOutput io.
 
 // storeOnLogsUpdate waits for the logs buffer to grow in length and sends the logs
 // for storing.
-// TODO: Allow to customize the delay between checks.
-func (job *Job) storeOnLogsUpdate(updateLogsChan chan Job, stopLoggingChan chan bool) {
-	previousLength := job.Logs.Len()
-	for {
-		select {
-		case <-stopLoggingChan:
-			return
-
-		default:
-			if job.Logs.Len() > previousLength {
-				updateLogsChan <- *job
-			}
-			time.Sleep(1 * time.Millisecond)
-		}
-	}
-}
-
-// storeOnLogsUpdate waits for the logs bugger to grow in length and stores the
-// job if it happens.
 // TODO: Allow to customize the delay between checks.
 func (job *Job) storeOnLogsUpdate(updateLogsChan chan Job, stopLoggingChan chan bool) {
 	previousLength := job.Logs.Len()
